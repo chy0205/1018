@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-image: url('003.png');
+        background-size: cover;
+        background-position: top center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        text-align: center;
+        padding: 50px;
+      }
+      #spinSound, #finishSound {
+        display: none;
+      }
+        /* --------------------------------- */
+        /* 彈出視窗 (Modal) 樣式 */
+        /* --------------------------------- */
+        .modal {
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6); /* 更深的遮罩 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .modal-button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: center;
+        }
+
+        .modal-button {
+            background-color: #ef4444; /* 紅色 */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 9999px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px #b91c1c; /* 立體效果 */
+        }
+
+        .modal-button:hover {
+            background-color: #dc2626;
+        }
+        
+        .modal-button:active {
+            box-shadow: 0 2px #b91c1c;
+            transform: translate(0, 2px);
+        }
+        
+        /* --------------------------------- */
+        /* 抽獎結果顯示框 */
+        /* --------------------------------- */
+        .result-box {
+            position: absolute;
+            top: 37%; /* 向下移動 5% */
+            left: 49.5%;
+            transform: translate(-50%, -50%);
+            width: 450px;
+            height: 150px;
+            background-color: rgba(255, 255, 255, 0);
+            border-radius: 0.75rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4rem;
+            font-weight: 700;
+            color: #4b5563;
+            border: none;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        /* --------------------------------- */
+        /* 主要按鈕組 */
+        /* --------------------------------- */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            z-index: 20;
+            position: absolute;
+            top: 51%;
+            left: 50%;
+            transform: translate(-50%, 0px); 
+        }
+        
+        .button {
+            background-color: #d1d5db;
+            color: #1f2937;
+            font-weight: 700;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .button:hover {
+            background-color: #9ca3af;
+        }
+
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        .message {
+            font-size: 1.25rem;
+            font-weight: 700;
+            min-height: 2rem;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            z-index: 20;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, 70px);
+        }
+
+        /* --------------------------------- */
+        /* 抽獎紀錄區塊 */
+        /* --------------------------------- */
+        .history-container {
+            width: 350px;
+            padding: 1rem;
+            text-align: left;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 20;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, 140px);
+        }
+        
+        .history-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            text-align: left;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 0.25rem 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 彈出視窗區塊 (恢復) -->
+    <div id="modalContainer" class="modal">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold">請選擇要使用的名單：</h2>
+            <div class="modal-button-group">
+                <button id="selectList1Btn" class="modal-button">組別</button>
+                <button id="selectList2Btn" class="modal-button">個人</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div id="pickerContainer">
+        <!-- 核心功能區塊 -->
+        <div id="resultBox" class="result-box">--</div>
+        <div class="button-group">
+            <button id="pickBtn" class="button" disabled>開始抽獎</button>
+            <button id="clearHistoryBtn" class="button">清除紀錄</button>
+        </div>
+        
+        <div id="message" class="message"></div>
+
+        <div class="history-container">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="history-title">抽獎紀錄</h2>
+                <span id="historyCount" class="text-sm text-gray-500"></span>
+            </div>
+            <ul id="historyList" class="history-list">
+                <!-- 記錄將在這裡顯示 -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- 音效元素 (隱藏) -->
+    <!-- 轉動音效 (Loop 循環播放) -->
+    <audio id="spinSound" src="002.mp3" loop preload="auto"></audio>
+    <!-- 結束/成功音效 (較長，用於選取特定片段) -->
+    <audio id="finishSound" src="002.mp3" preload="auto"></audio>
+
+    <script>
+        // 隨機選取器邏輯
+        const SPREADSHEET_ID = '1BgOdR7cQzFpKYPim5sxIo3eC2JN5CWOtfg-oYdd_3EQ';
+        const GIDS = {
+            '名單一': '921041441',
+            '名單二': '824754110'
+        };
+        
+        // ===========================================
+        // 獲取音效元素及功能模組
+        // ===========================================
+        const spinSound = document.getElementById('spinSound');
+        const finishSound = document.getElementById('finishSound');
+
+        /**
+         * 播放轉動/持續音效。
+         */
+        function playSpinSound() {
+            if (spinSound) {
+                spinSound.currentTime = 0; // 重置到開頭
+                // 使用 .catch 處理瀏覽器可能禁止自動播放的問題
+                spinSound.play().catch(e => console.log("轉動音頻播放失敗:", e));
+            }
+        }
+
+        /**
+         * 停止轉動音效。
+         */
+        function stopSpinSound() {
+            if (spinSound) {
+                spinSound.pause(); // 暫停播放
+                spinSound.currentTime = 0; // 重置到開頭
+            }
+        }
+
+        /**
+         * 播放結束音效的特定區段。
+         * @param {number} startTime - 音效開始播放的秒數 (例如 9)。
+         * @param {number} duration - 音效持續播放的秒數 (例如 2)。
+         */
+        function playFinishSound(startTime, duration) {
+            if (finishSound) {
+                finishSound.currentTime = startTime; // 設定播放起點 (秒)
+                finishSound.play().catch(e => console.log("結束音頻播放失敗:", e));
+
+                // 設定在指定秒數後停止播放
+                setTimeout(() => {
+                    finishSound.pause();
+                    finishSound.currentTime = 0; // 重置到開頭
+                }, duration * 1000); // 轉換為毫秒
+            }
+        }
+
+        /**
+         * 停止所有音效（用於重新開始或重設）。
+         */
+        function stopAllSounds() {
+            stopSpinSound();
+            if (finishSound) {
+                finishSound.pause();
+                finishSound.currentTime = 0;
+            }
+        }
+        // ===========================================
+        
+        // 取得彈出視窗元素
+        const modalContainer = document.getElementById('modalContainer');
+        const selectList1Btn = document.getElementById('selectList1Btn');
+        const selectList2Btn = document.getElementById('selectList2Btn');
+        
+        const resultBox = document.getElementById('resultBox');
+        const pickBtn = document.getElementById('pickBtn');
+        const messageDiv = document.getElementById('message');
+        const historyList = document.getElementById('historyList');
+        const historyCountSpan = document.getElementById('historyCount');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        
+        let currentGid = '';
+        let teamsData = [];
+        let allData = {};
+        let isPicking = false;
+        let drawHistory = [];
+
+        async function fetchTeamsData(gid) {
+            try {
+                if (allData[gid]) {
+                    return allData[gid];
+                }
+
+                const TEAMS_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&gid=${gid}`;
+                
+                const response = await fetch(TEAMS_SHEET_URL);
+                const text = await response.text();
+                
+                // 處理 JSONP 格式
+                const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonText);
+
+                const parsedData = data.table.rows.map(row => {
+                    if (row.c.length > 1 && row.c[1] && row.c[1].v) {
+                        return `${row.c[0].v}: ${row.c[1].v}`; // 組合: 姓名
+                    } else if (row.c[0] && row.c[0].v) {
+                        return row.c[0].v; // 只有姓名/組別名
+                    }
+                    return null;
+                }).filter(item => item !== null);
+
+                allData[gid] = parsedData;
+                return parsedData;
+
+            } catch (error) {
+                console.error('載入姓名資料失敗:', error);
+                if (messageDiv) {
+                    messageDiv.textContent = '載入資料失敗。請檢查您的試算表網址和權限設定。';
+                }
+                return [];
+            }
+        }
+
+        async function updateList() {
+            const fetchedData = await fetchTeamsData(currentGid);
+            teamsData = [...fetchedData];
+            
+            if (teamsData.length > 0) {
+                resultBox.textContent = '準備好了！';
+                pickBtn.disabled = false;
+                if (messageDiv) {
+                    messageDiv.textContent = '';
+                }
+            } else {
+                resultBox.textContent = '載入失敗';
+                pickBtn.disabled = true;
+                if (messageDiv) {
+                    messageDiv.textContent = '試算表中沒有找到可用的姓名資料。';
+                }
+            }
+            drawHistory = [];
+            renderHistory();
+        }
+
+        function renderHistory() {
+            historyList.innerHTML = '';
+            drawHistory.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                li.textContent = `${index + 1}. ${item}`;
+                historyList.prepend(li);
+            });
+            historyCountSpan.textContent = ``;
+        }
+
+        function startPicking() {
+            if (isPicking || teamsData.length === 0) {
+                if (teamsData.length === 0 && messageDiv) {
+                    messageDiv.textContent = '名單已抽完，請點擊「清除紀錄」重新開始。';
+                }
+                return;
+            }
+
+            isPicking = true;
+            pickBtn.disabled = true;
+            if (messageDiv) {
+                messageDiv.textContent = '';
+            }
+            
+            // 步驟 1: 播放轉動音效
+            playSpinSound(); 
+
+            let count = 0;
+            const originalData = allData[currentGid];
+            const pickingInterval = setInterval(() => {
+                // 隨機抽選資料，但不影響 teamsData (抽過的會從 teamsData 移除)
+                const randomIndex = Math.floor(Math.random() * originalData.length);
+                const item = originalData[randomIndex];
+                
+                resultBox.textContent = item;
+                
+                count++;
+
+                if (count > 30) {
+                    clearInterval(pickingInterval);
+                    isPicking = false;
+                    
+                    // 步驟 2: 停止轉動音效
+                    stopSpinSound();
+
+                    // 確定最終結果從尚未抽出的名單 (teamsData) 中選取
+                    const finalIndex = Math.floor(Math.random() * teamsData.length);
+                    const finalItem = teamsData[finalIndex];
+                    
+                    resultBox.textContent = finalItem;
+                    
+                    // 步驟 3: 播放結束音效 (從第 9 秒開始播 2 秒)
+                    playFinishSound(9, 2); 
+                    
+                    if (messageDiv) {
+                        messageDiv.textContent = ' ';
+                    }
+                    drawHistory.push(finalItem);
+                    teamsData.splice(finalIndex, 1); // 將已抽出的從名單中移除
+                    renderHistory();
+                    
+                    if (teamsData.length > 0) {
+                        pickBtn.disabled = false;
+                    } else {
+                        pickBtn.disabled = true;
+                        if (messageDiv) {
+                            messageDiv.textContent = '名單已抽完！請點擊「清除紀錄」重新開始。';
+                        }
+                    }
+                }
+            }, 50);
+        }
+
+        function clearHistory() {
+            // 步驟 4: 清除紀錄時停止所有音效
+            stopAllSounds(); 
+
+            drawHistory = [];
+            renderHistory();
+            updateList(); // 重載名單
+            if (messageDiv) {
+                messageDiv.textContent = '紀錄已清除，名單已重置。';
+            }
+        }
+        
+        function handleListSelection(listName) {
+            currentGid = GIDS[listName];
+            modalContainer.style.display = 'none'; // 隱藏視窗
+            updateList();
+        }
+
+        pickBtn.addEventListener('click', startPicking);
+        clearHistoryBtn.addEventListener('click', clearHistory);
+
+        // 名單選擇事件監聽
+        selectList1Btn.addEventListener('click', () => handleListSelection('名單一'));
+        selectList2Btn.addEventListener('click', () => handleListSelection('名單二'));
+
+        // 頁面載入時：顯示彈出視窗
+        document.addEventListener('DOMContentLoaded', () => {
+             modalContainer.style.display = 'flex';
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
