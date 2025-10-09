@@ -1,197 +1,165 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <base target="_top" />
+    <base target="_top" /> <!-- 設定所有連結在新視窗開啟 -->
     <style>
+      /* =========================================== */
+      /* 全域和基礎樣式 */
+      /* =========================================== */
       body {
-        font-family: Arial, sans-serif;
-        background-image: url('003.png');
-        background-size: cover;
-        background-position: top center;
-        background-attachment: fixed;
-        background-repeat: no-repeat;
-        text-align: center;
-        padding: 50px;
+        font-family: Arial, sans-serif; /* 設定字體 */
+        background-image: url('003.png'); /* 【修改點】替換背景圖片 URL/路徑 */
+        background-size: cover; /* 確保圖片覆蓋整個背景 */
+        background-position: top center; /* 圖片從頂部中央開始顯示 */
+        background-attachment: fixed; /* 讓背景圖片不隨內容滾動 */
+        background-repeat: no-repeat; /* 不重複背景圖片 */
+        text-align: center; /* 內文置中對齊 */
+        padding: 50px; /* 頁面邊距 */
       }
+      /* 隱藏音效元素，避免在頁面上顯示播放器控制項 */
       #spinSound, #finishSound {
-        display: none;
+        display: none; /* 隱藏音效播放器 */
       }
         /* --------------------------------- */
         /* 彈出視窗 (Modal) 樣式 */
         /* --------------------------------- */
         .modal {
-            position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.6); /* 更深的遮罩 */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: fixed; /* 固定在視窗上 */
+            z-index: 100; /* 確保在所有元素之上 */
+            left: 0; /* 從左邊界開始 */
+            top: 0; /* 從頂部邊界開始 */
+            width: 100%; /* 寬度佔滿整個視窗 */
+            height: 100%; /* 高度佔滿整個視窗 */
+            overflow: auto; /* 允許內容溢出時滾動 */
+            background-color: rgba(0,0,0,0.6); /* 遮罩背景色和透明度 */
+            display: flex; /* 啟用 Flexbox 佈局 */
+            align-items: center; /* 垂直居中內容 */
+            justify-content: center; /* 水平居中內容 */
         }
 
         .modal-content {
-            background-color: #fefefe;
-            padding: 2rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            text-align: center;
-            animation: fadeIn 0.3s ease-out;
+            background-color: #fefefe; /* 內容框背景色 */
+            padding: 2rem; /* 內部填充空間 */
+            border-radius: 1.5rem; /* 圓角設定 */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); /* 彈出框陰影 */
+            text-align: center; /* 文字居中對齊 */
+            animation: fadeIn 0.3s ease-out; /* 彈入動畫效果 */
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .modal-button-group {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            justify-content: center;
-        }
-
+        /* 按鈕樣式 (選擇名單按鈕) */
         .modal-button {
-            background-color: #ef4444; /* 紅色 */
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 9999px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            box-shadow: 0 4px #b91c1c; /* 立體效果 */
-        }
-
-        .modal-button:hover {
-            background-color: #dc2626;
-        }
-        
-        .modal-button:active {
-            box-shadow: 0 2px #b91c1c;
-            transform: translate(0, 2px);
+            background-color: #ef4444; /* 紅色背景 */
+            box-shadow: 0 4px #b91c1c; /* 立體效果的陰影 (向下位移 4px) */
+            /* 其他樣式... (此處可新增更多按鈕通用樣式) */
         }
         
         /* --------------------------------- */
         /* 抽獎結果顯示框 */
         /* --------------------------------- */
         .result-box {
-            position: absolute;
-            top: 37%; /* 向下移動 5% */
-            left: 49.5%;
-            transform: translate(-50%, -50%);
-            width: 450px;
-            height: 150px;
-            background-color: rgba(255, 255, 255, 0);
-            border-radius: 0.75rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 4rem;
-            font-weight: 700;
-            color: #4b5563;
-            border: none;
-            box-shadow: inset 0 3px 5px rgba(0,0,0,0.1);
-            text-align: center;
-            pointer-events: none;
-            z-index: 10;
+            position: absolute; /* 相對定位 (相對於 body) */
+            top: 37%; /* 【調整】結果框的垂直位置 (0% 為頂部) */
+            left: 49.5%; /* 【調整】結果框的水平位置 */
+            transform: translate(-50%, -50%); /* 確保結果框中心點在 top/left 的位置 (水平和垂直位移 -50%) */
+            width: 450px; /* 【調整】結果框寬度 */
+            height: 150px; /* 【調整】結果框高度 */
+            background-color: rgba(255, 255, 255, 0); /* 【調整】結果框背景色 (0 為透明) */
+            
+            /* -- 內容居中與美化設定 -- */
+            border-radius: 0.75rem; /* 設定圓角效果，使邊角更圓滑 */
+            display: flex; /* 啟用彈性佈局 (Flexbox) */
+            justify-content: center; /* 將內容（文字）在水平方向上置中 */
+            align-items: center; /* 將內容（文字）在垂直方向上置中 */
+            /* ---------------------------------------------------- */
+            
+            font-size: 4rem; /* 【調整】結果文字的大小 */
+            font-weight: 700; /* 字體加粗 */
+            color: #4b5563; /* 【調整】結果文字的顏色 */
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.1); /* 內部陰影，增加立體感 */
+            pointer-events: none; /* 讓滑鼠事件穿透此元素，不會擋住下層元素 */
+            z-index: 10; /* 層級設定 */
         }
         
         /* --------------------------------- */
-        /* 主要按鈕組 */
+        /* 主要按鈕組 (開始抽獎/清除紀錄) */
         /* --------------------------------- */
         .button-group {
-            display: flex;
-            gap: 1rem;
-            z-index: 20;
-            position: absolute;
-            top: 51%;
-            left: 50%;
-            transform: translate(-50%, 0px); 
+            display: flex; /* 啟用彈性佈局，使按鈕並排顯示 */
+            gap: 1rem; /* 按鈕之間的間隔 */
+            z-index: 20; /* 確保按鈕在其他元素之上 */
+            position: absolute; /* 相對 body 定位 */
+            top: 51%; /* 【調整】按鈕組的垂直位置 (要配合背景圖) */
+            left: 50%; /* 水平中央位置 */
+            transform: translate(-50%, 0px); /* 水平置中 (向左移動寬度的一半) */
         }
         
+        /* 主要按鈕樣式 */
         .button {
-            background-color: #d1d5db;
-            color: #1f2937;
-            font-weight: 700;
-            padding: 0.75rem 2rem;
-            border-radius: 9999px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            padding: 0.75rem 1.5rem; /* 內部填充空間 */
+            border: none; /* 移除邊框 */
+            border-radius: 0.5rem; /* 圓角 */
+            cursor: pointer; /* 鼠標變成手型 */
+            transition: background-color 0.2s; /* 顏色轉換動畫時間 */
+            font-weight: 600; /* 字體粗細 */
+            background-color: #d1d5db; /* 預設背景色 */
+            color: #1f2937; /* 文字顏色 */
         }
-
+        /* 懸停效果 (Hover) */
         .button:hover {
-            background-color: #9ca3af;
+            background-color: #9ca3af; /* 懸停時顏色變深 */
         }
 
-        .button:active {
-            transform: scale(0.98);
-        }
-
+        /* --------------------------------- */
+        /* 提示訊息 (如：已抽出、名單已抽完) */
+        /* --------------------------------- */
         .message {
-            font-size: 1.25rem;
-            font-weight: 700;
-            min-height: 2rem;
-            color: #ffffff;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-            z-index: 20;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, 70px);
+            font-size: 1.25rem; /* 字體大小 */
+            font-weight: 700; /* 字體加粗 */
+            min-height: 2rem; /* 最小高度 */
+            color: #ffffff; /* 文字顏色設為白色 */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8); /* 文字陰影，使文字在背景上更清晰 */
+            z-index: 20; /* 層級設定 */
+            position: absolute; /* 相對 body 定位 */
+            top: 50%; /* 【調整】提示訊息的垂直位置 */
+            left: 50%; /* 水平中央位置 */
+            transform: translate(-50%, 70px); /* 水平置中並向下移動 70px */
         }
 
         /* --------------------------------- */
         /* 抽獎紀錄區塊 */
         /* --------------------------------- */
         .history-container {
-            width: 350px;
-            padding: 1rem;
-            text-align: left;
-            background-color: rgba(255, 255, 255, 0.6);
-            border-radius: 1rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 20;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, 140px);
+            width: 350px; /* 【調整】紀錄區塊寬度 */
+            padding: 1rem; /* 內部填充 */
+            text-align: left; /* 文字靠左對齊 */
+            background-color: rgba(255, 255, 255, 0.6); /* 紀錄區塊背景色 (半透明) */
+            border-radius: 1rem; /* 圓角設定 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 區塊陰影 */
+            z-index: 20; /* 層級設定 */
+            position: absolute; /* 相對 body 定位 */
+            top: 50%; /* 【調整】紀錄區塊的垂直位置 */
+            left: 50%; /* 水平中央位置 */
+            transform: translate(-50%, 140px); /* 水平置中並向下移動 140px */
         }
         
-        .history-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 0.5rem;
-            text-align: left;
-        }
-
         .history-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            max-height: 100px;
-            overflow-y: auto;
+            max-height: 100px; /* 【調整】紀錄清單的最大高度，超過會出現垂直捲軸 */
+            overflow-y: auto; /* 超出高度時顯示垂直捲軸 */
         }
 
         .history-item {
-            padding: 0.25rem 0.5rem;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 0.9rem;
-            color: #374151;
+            padding: 0.25rem 0; /* 上下內邊距 */
+            border-bottom: 1px solid #e5e7eb; /* 底部細線分隔 */
+            font-size: 0.9rem; /* 字體大小 */
         }
-
+        /* 移除最後一項紀錄的底線，避免視覺多餘 */
         .history-item:last-child {
-            border-bottom: none;
+            border-bottom: none; /* 移除最後一個項目的底線 */
         }
     </style>
 </head>
 <body>
-    <!-- 彈出視窗區塊 (恢復) -->
+    <!-- 彈出視窗區塊 (名單選擇) -->
     <div id="modalContainer" class="modal">
         <div class="modal-content">
             <h2 class="text-2xl font-bold">請選擇要使用的名單：</h2>
@@ -226,32 +194,33 @@
 
     <!-- 音效元素 (隱藏) -->
     <!-- 轉動音效 (Loop 循環播放) -->
-    <audio id="spinSound" src="002.mp3" loop preload="auto"></audio>
+    <audio id="spinSound" src="002.mp3" loop preload="auto"></audio> <!-- 【修改點】替換轉動音效檔案路徑 -->
     <!-- 結束/成功音效 (較長，用於選取特定片段) -->
-    <audio id="finishSound" src="002.mp3" preload="auto"></audio>
+    <audio id="finishSound" src="002.mp3" preload="auto"></audio> <!-- 【修改點】替換結束音效檔案路徑 -->
 
     <script>
-        // 隨機選取器邏輯
-        const SPREADSHEET_ID = '1r24BcBG0KjRdre8Uh2zp9UlcaG5DTdwdtZrt0bqOC44';
-        const GIDS = {
-            '名單一': '921041441',
-            '名單二': '824754110'
+        // ===========================================
+        // 設定區塊
+        // ===========================================
+        const SPREADSHEET_ID = '1r24BcBG0KjRdre8Uh2zp9UlcaG5DTdwdtZrt0bqOC44'; // 【修改點】您的 Google 試算表 ID
+        const GIDS = { // 定義名單名稱與其對應的 GID
+            '名單一': '921041441', // 【修改點】名單一 (組別) 所在工作表的分頁 ID (GID)
+            '名單二': '824754110' // 【修改點】名單二 (個人) 所在工作表的分頁 ID (GID)
         };
         
         // ===========================================
         // 獲取音效元素及功能模組
         // ===========================================
-        const spinSound = document.getElementById('spinSound');
-        const finishSound = document.getElementById('finishSound');
+        const spinSound = document.getElementById('spinSound'); // 取得轉動音效元素
+        const finishSound = document.getElementById('finishSound'); // 取得結束音效元素
 
         /**
          * 播放轉動/持續音效。
          */
         function playSpinSound() {
-            if (spinSound) {
-                spinSound.currentTime = 0; // 重置到開頭
-                // 使用 .catch 處理瀏覽器可能禁止自動播放的問題
-                spinSound.play().catch(e => console.log("轉動音頻播放失敗:", e));
+            if (spinSound) { // 檢查元素是否存在
+                spinSound.currentTime = 0; // 重置到開頭，確保每次都從頭播放
+                spinSound.play().catch(e => console.log("轉動音頻播放失敗:", e)); // 嘗試播放並捕捉潛在錯誤
             }
         }
 
@@ -259,9 +228,9 @@
          * 停止轉動音效。
          */
         function stopSpinSound() {
-            if (spinSound) {
+            if (spinSound) { // 檢查元素是否存在
                 spinSound.pause(); // 暫停播放
-                spinSound.currentTime = 0; // 重置到開頭
+                spinSound.currentTime = 0; // 重置到開頭，為下次播放做準備
             }
         }
 
@@ -271,15 +240,15 @@
          * @param {number} duration - 音效持續播放的秒數 (例如 2)。
          */
         function playFinishSound(startTime, duration) {
-            if (finishSound) {
+            if (finishSound) { // 檢查元素是否存在
                 finishSound.currentTime = startTime; // 設定播放起點 (秒)
-                finishSound.play().catch(e => console.log("結束音頻播放失敗:", e));
+                finishSound.play().catch(e => console.log("結束音頻播放失敗:", e)); // 嘗試播放音效
 
                 // 設定在指定秒數後停止播放
                 setTimeout(() => {
-                    finishSound.pause();
+                    finishSound.pause(); // 暫停播放
                     finishSound.currentTime = 0; // 重置到開頭
-                }, duration * 1000); // 轉換為毫秒
+                }, duration * 1000); // 將持續時間從秒轉換為毫秒
             }
         }
 
@@ -287,207 +256,218 @@
          * 停止所有音效（用於重新開始或重設）。
          */
         function stopAllSounds() {
-            stopSpinSound();
-            if (finishSound) {
-                finishSound.pause();
-                finishSound.currentTime = 0;
+            stopSpinSound(); // 停止轉動音效
+            if (finishSound) { // 檢查結束音效元素
+                finishSound.pause(); // 暫停結束音效
+                finishSound.currentTime = 0; // 重置結束音效進度
             }
         }
         // ===========================================
         
-        // 取得彈出視窗元素
-        const modalContainer = document.getElementById('modalContainer');
-        const selectList1Btn = document.getElementById('selectList1Btn');
-        const selectList2Btn = document.getElementById('selectList2Btn');
+        // 取得 UI 元素 (DOM 引用)
+        const modalContainer = document.getElementById('modalContainer'); // 取得名單選擇彈出視窗元素
+        const selectList1Btn = document.getElementById('selectList1Btn'); // 取得名單一 (組別) 按鈕
+        const selectList2Btn = document.getElementById('selectList2Btn'); // 取得名單二 (個人) 按鈕
         
-        const resultBox = document.getElementById('resultBox');
-        const pickBtn = document.getElementById('pickBtn');
-        const messageDiv = document.getElementById('message');
-        const historyList = document.getElementById('historyList');
-        const historyCountSpan = document.getElementById('historyCount');
-        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const resultBox = document.getElementById('resultBox'); // 取得顯示抽獎結果的方框
+        const pickBtn = document.getElementById('pickBtn'); // 取得「開始抽獎」按鈕
+        const messageDiv = document.getElementById('message'); // 取得顯示提示訊息的區塊
+        const historyList = document.getElementById('historyList'); // 取得歷史紀錄清單 (UL)
+        const historyCountSpan = document.getElementById('historyCount'); // 取得歷史紀錄計數顯示區
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn'); // 取得「清除紀錄」按鈕
         
-        let currentGid = '';
-        let teamsData = [];
-        let allData = {};
-        let isPicking = false;
-        let drawHistory = [];
-
+        // 狀態變數
+        let currentGid = ''; // 當前選中的名單 GID (工作表分頁 ID)
+        let teamsData = []; // 尚未抽出的名單陣列 (每次抽出會減少)
+        let allData = {};   // 完整的名單資料快取 (用於亂數跳動顯示)
+        let isPicking = false; // 抽獎動畫是否正在進行中 (布林值)
+        let drawHistory = []; // 已抽出的紀錄陣列
+        
+        /**
+         * 異步函數：從 Google 試算表獲取名單數據
+         * 備註：使用 Google Visualization API (gviz) 接口來獲取 JSON 格式數據。
+         * @param {string} gid - 工作表的分頁 ID。
+         * @returns {Promise<string[]>} - 名單陣列。
+         */
         async function fetchTeamsData(gid) {
             try {
-                if (allData[gid]) {
-                    return allData[gid];
+                if (allData[gid]) { // 檢查快取中是否已有數據
+                    return allData[gid]; // 如果已經快取，則直接返回，避免重複請求
                 }
 
-                const TEAMS_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&gid=${gid}`;
+                const TEAMS_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&gid=${gid}`; // 構造 API 請求 URL
                 
-                const response = await fetch(TEAMS_SHEET_URL);
-                const text = await response.text();
+                const response = await fetch(TEAMS_SHEET_URL); // 發送網絡請求獲取數據
+                const text = await response.text(); // 獲取響應文本
                 
-                // 處理 JSONP 格式
-                const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-                const data = JSON.parse(jsonText);
+                // 處理 JSONP 格式 (移除 Google 特有的包裝字串)
+                const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1); // 提取純 JSON 內容
+                const data = JSON.parse(jsonText); // 將 JSON 字串解析為 JavaScript 物件
 
-                const parsedData = data.table.rows.map(row => {
+                // 解析試算表數據
+                const parsedData = data.table.rows.map(row => { // 遍歷每一行數據
+                    // 假設名單在第 A, B 兩欄 (c[0], c[1])
                     if (row.c.length > 1 && row.c[1] && row.c[1].v) {
-                        return `${row.c[0].v}: ${row.c[1].v}`; // 組合: 姓名
+                        return `${row.c[0].v}: ${row.c[1].v}`; // 組合: 姓名 (取兩欄數據)
                     } else if (row.c[0] && row.c[0].v) {
-                        return row.c[0].v; // 只有姓名/組別名
+                        return row.c[0].v; // 只有姓名/組別名 (取第一欄數據)
                     }
-                    return null;
-                }).filter(item => item !== null);
+                    return null; // 如果數據無效則返回 null
+                }).filter(item => item !== null); // 過濾掉空行 (null 值)
 
-                allData[gid] = parsedData;
-                return parsedData;
+                allData[gid] = parsedData; // 儲存快取
+                return parsedData; // 返回解析後的名單
 
             } catch (error) {
-                console.error('載入姓名資料失敗:', error);
+                console.error('載入姓名資料失敗:', error); // 打印錯誤訊息到控制台
                 if (messageDiv) {
-                    messageDiv.textContent = '載入資料失敗。請檢查您的試算表網址和權限設定。';
+                    messageDiv.textContent = '載入資料失敗。請檢查您的試算表網址和權限設定。'; // 顯示錯誤提示
                 }
-                return [];
+                return []; // 返回空陣列
             }
         }
 
+        /**
+         * 重新載入名單並重置狀態。在切換名單和清除紀錄時調用。
+         */
         async function updateList() {
-            const fetchedData = await fetchTeamsData(currentGid);
-            teamsData = [...fetchedData];
+            const fetchedData = await fetchTeamsData(currentGid); // 獲取選定的名單數據
+            teamsData = [...fetchedData]; // 複製完整名單到待抽名單 (使用展開運算符避免引用)
             
-            if (teamsData.length > 0) {
-                resultBox.textContent = '準備好了！';
-                pickBtn.disabled = false;
+            if (teamsData.length > 0) { // 檢查名單是否有內容
+                resultBox.textContent = '準備好了！'; // 顯示準備訊息
+                pickBtn.disabled = false; // 啟用抽獎按鈕
                 if (messageDiv) {
-                    messageDiv.textContent = '';
+                    messageDiv.textContent = ''; // 清空提示訊息
                 }
             } else {
-                resultBox.textContent = '載入失敗';
-                pickBtn.disabled = true;
+                resultBox.textContent = '載入失敗'; // 顯示載入失敗訊息
+                pickBtn.disabled = true; // 禁用抽獎按鈕
                 if (messageDiv) {
-                    messageDiv.textContent = '試算表中沒有找到可用的姓名資料。';
+                    messageDiv.textContent = '試算表中沒有找到可用的姓名資料。'; // 顯示錯誤提示
                 }
             }
-            drawHistory = [];
-            renderHistory();
+            drawHistory = []; // 清空歷史紀錄陣列
+            renderHistory(); // 更新歷史紀錄顯示
         }
 
+        /**
+         * 渲染歷史紀錄列表，新紀錄會顯示在最上方。
+         */
         function renderHistory() {
-            historyList.innerHTML = '';
-            drawHistory.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.className = 'history-item';
-                li.textContent = `${index + 1}. ${item}`;
-                historyList.prepend(li);
+            historyList.innerHTML = ''; // 清空現有列表 (DOM 操作)
+            drawHistory.forEach((item, index) => { // 遍歷已抽出的紀錄
+                const li = document.createElement('li'); // 創建新的列表項目元素
+                li.className = 'history-item'; // 設定 CSS 類別
+                li.textContent = `${index + 1}. ${item}`; // 設定顯示的文字內容 (編號 + 姓名)
+                historyList.prepend(li); // 將新項目添加到清單的最開頭
             });
-            historyCountSpan.textContent = ``;
+            historyCountSpan.textContent = `已抽出：${drawHistory.length}人`; // 更新計數器的顯示文字
         }
 
+        /**
+         * 開始抽獎的主要邏輯：執行亂數跳動動畫並選定結果。
+         */
         function startPicking() {
-            if (isPicking || teamsData.length === 0) {
+            if (isPicking || teamsData.length === 0) { // 檢查是否正在抽獎或名單是否為空
                 if (teamsData.length === 0 && messageDiv) {
-                    messageDiv.textContent = '名單已抽完，請點擊「清除紀錄」重新開始。';
+                    messageDiv.textContent = '名單已抽完，請點擊「清除紀錄」重新開始。'; // 顯示抽完提示
                 }
-                return;
+                return; // 退出函數
             }
 
-            isPicking = true;
-            pickBtn.disabled = true;
+            isPicking = true; // 設定抽獎狀態為進行中
+            pickBtn.disabled = true; // 禁用抽獎按鈕，防止重複點擊
             if (messageDiv) {
-                messageDiv.textContent = '';
+                messageDiv.textContent = ''; // 清空提示訊息
             }
             
-            // 步驟 1: 播放轉動音效
-            playSpinSound(); 
+            // 步驟 1: 播放轉動音效 (loop 模式)
+            playSpinSound(); // 播放音效
 
-            let count = 0;
-            const originalData = allData[currentGid];
-            const pickingInterval = setInterval(() => {
-                // 隨機抽選資料，但不影響 teamsData (抽過的會從 teamsData 移除)
-                const randomIndex = Math.floor(Math.random() * originalData.length);
-                const item = originalData[randomIndex];
+            let count = 0; // 亂數跳動計數器
+            // 亂數跳動時，使用完整的名單 (allData) 來增加視覺豐富度
+            const originalData = allData[currentGid]; // 獲取完整名單
+            
+            const pickingInterval = setInterval(() => { // 設定定時器，開始亂數跳動
+                const randomIndex = Math.floor(Math.random() * originalData.length); // 亂數選擇一個索引
+                const item = originalData[randomIndex]; // 取得該索引對應的項目
                 
-                resultBox.textContent = item;
+                resultBox.textContent = item; // 在結果框顯示亂數結果
                 
-                count++;
+                count++; // 增加計數
 
-                if (count > 30) {
-                    clearInterval(pickingInterval);
-                    isPicking = false;
+                if (count > 30) { // 【調整】亂數跳動的總次數 (達到次數後停止)
+                    clearInterval(pickingInterval); // 清除定時器，停止亂數跳動
+                    isPicking = false; // 設定抽獎狀態為非進行中
                     
                     // 步驟 2: 停止轉動音效
-                    stopSpinSound();
+                    stopSpinSound(); // 停止持續的轉動音效
 
                     // 確定最終結果從尚未抽出的名單 (teamsData) 中選取
-                    const finalIndex = Math.floor(Math.random() * teamsData.length);
-                    const finalItem = teamsData[finalIndex];
+                    const finalIndex = Math.floor(Math.random() * teamsData.length); // 亂數選擇最終結果的索引
+                    const finalItem = teamsData[finalIndex]; // 根據索引取得最終結果
                     
-                    resultBox.textContent = finalItem;
+                    resultBox.textContent = finalItem; // 在結果框顯示最終結果
                     
-                    // 步驟 3: 播放結束音效 (從第 9 秒開始播 2 秒)
-                    playFinishSound(9, 2); 
+                    // 步驟 3: 播放結束音效 (只播特定片段)
+                    playFinishSound(9, 2); // 【調整】音效參數：從第 9 秒開始播，持續 2 秒
                     
                     if (messageDiv) {
-                        messageDiv.textContent = ' ';
+                        messageDiv.textContent = '🎉 抽出: ' + finalItem + ' 🎉'; // 顯示最終結果的提示文字
                     }
-                    drawHistory.push(finalItem);
-                    teamsData.splice(finalIndex, 1); // 將已抽出的從名單中移除
-                    renderHistory();
+                    drawHistory.push(finalItem); // 將結果加入歷史紀錄
+                    teamsData.splice(finalIndex, 1); // 將已抽出的從待抽名單中移除
+                    renderHistory(); // 更新歷史紀錄顯示
                     
-                    if (teamsData.length > 0) {
-                        pickBtn.disabled = false;
+                    if (teamsData.length > 0) { // 檢查是否還有待抽名單
+                        pickBtn.disabled = false; // 如果還有名單，則啟用按鈕
                     } else {
-                        pickBtn.disabled = true;
+                        pickBtn.disabled = true; // 如果名單已抽完，則禁用按鈕
                         if (messageDiv) {
-                            messageDiv.textContent = '名單已抽完！請點擊「清除紀錄」重新開始。';
+                            messageDiv.textContent = '名單已抽完！請點擊「清除紀錄」重新開始。'; // 顯示名單抽完提示
                         }
                     }
                 }
-            }, 50);
+            }, 50); // 【調整】亂數跳動的速度 (50毫秒，數字越小轉速越快)
         }
 
+        /**
+         * 清除歷史紀錄並重設名單 (恢復到完整名單)
+         */
         function clearHistory() {
             // 步驟 4: 清除紀錄時停止所有音效
-            stopAllSounds(); 
+            stopAllSounds(); // 停止所有正在播放的音效
 
-            drawHistory = [];
-            renderHistory();
-            updateList(); // 重載名單
+            drawHistory = []; // 清空紀錄陣列
+            renderHistory(); // 更新歷史紀錄顯示 (清空列表)
+            updateList(); // 重載名單 (將 teamsData 恢復到完整名單)
             if (messageDiv) {
-                messageDiv.textContent = '紀錄已清除，名單已重置。';
+                messageDiv.textContent = '紀錄已清除，名單已重置。'; // 顯示清除紀錄後的提示文字
             }
         }
         
+        /**
+         * 處理名單選擇按鈕的點擊事件
+         * @param {string} listName - '名單一' 或 '名單二'
+         */
         function handleListSelection(listName) {
-            currentGid = GIDS[listName];
+            currentGid = GIDS[listName]; // 設定當前 GID
             modalContainer.style.display = 'none'; // 隱藏視窗
-            updateList();
+            updateList(); // 載入選定的名單
         }
 
-        pickBtn.addEventListener('click', startPicking);
-        clearHistoryBtn.addEventListener('click', clearHistory);
+        // 事件監聽器
+        pickBtn.addEventListener('click', startPicking); // 監聽「開始抽獎」按鈕點擊事件
+        clearHistoryBtn.addEventListener('click', clearHistory); // 監聽「清除紀錄」按鈕點擊事件
 
-        // 名單選擇事件監聽
-        selectList1Btn.addEventListener('click', () => handleListSelection('名單一'));
-        selectList2Btn.addEventListener('click', () => handleListSelection('名單二'));
+        selectList1Btn.addEventListener('click', () => handleListSelection('名單一')); // 監聽名單一按鈕點擊
+        selectList2Btn.addEventListener('click', () => handleListSelection('名單二')); // 監聽名單二按鈕點擊
 
-        // 頁面載入時：顯示彈出視窗
-        document.addEventListener('DOMContentLoaded', () => {
-             modalContainer.style.display = 'flex';
+        // 頁面載入時：顯示彈出視窗讓使用者選擇名單
+        document.addEventListener('DOMContentLoaded', () => { // 當頁面 HTML 結構完全載入後執行
+             modalContainer.style.display = 'flex'; // 確保初始顯示名單選擇視窗
         });
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
