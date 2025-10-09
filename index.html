@@ -79,6 +79,32 @@
             pointer-events: none; /* 讓滑鼠事件穿透此元素，不會擋住下層元素 */
             z-index: 10; /* 層級設定 */
         }
+
+        /* --------------------------------- */
+        /* 抽獎數量設定區塊 (新增) */
+        /* --------------------------------- */
+        .draw-count-group {
+            position: absolute; /* 相對 body 定位 */
+            top: 48%; /* 稍微高於按鈕組 */
+            left: 50%; /* 水平中央位置 */
+            transform: translate(-50%, 0px); /* 水平置中 */
+            display: flex; /* 啟用 Flexbox */
+            align-items: center; /* 垂直居中對齊 */
+            gap: 0.5rem; /* 標籤和輸入框間距 */
+            z-index: 20;
+            color: #ffffff; /* 文字顏色設為白色 */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8); /* 文字陰影 */
+            font-weight: 600;
+        }
+
+        .draw-count-input {
+            width: 50px; /* 輸入框寬度 */
+            padding: 0.25rem;
+            border-radius: 0.3rem;
+            border: 1px solid #ccc;
+            text-align: center;
+            color: #1f2937; /* 輸入文字顏色 */
+        }
         
         /* --------------------------------- */
         /* 主要按鈕組 (開始抽獎/清除紀錄) */
@@ -88,7 +114,7 @@
             gap: 1rem; /* 按鈕之間的間隔 */
             z-index: 20; /* 確保按鈕在其他元素之上 */
             position: absolute; /* 相對 body 定位 */
-            top: 51%; /* 【調整】按鈕組的垂直位置 (要配合背景圖) */
+            top: 53%; /* 【調整】按鈕組的垂直位置 (要配合 draw-count-group) */
             left: 50%; /* 水平中央位置 */
             transform: translate(-50%, 0px); /* 水平置中 (向左移動寬度的一半) */
         }
@@ -122,7 +148,7 @@
             position: absolute; /* 相對 body 定位 */
             top: 50%; /* 【調整】提示訊息的垂直位置 */
             left: 50%; /* 水平中央位置 */
-            transform: translate(-50%, 70px); /* 水平置中並向下移動 70px */
+            transform: translate(-50%, 100px); /* 水平置中並向下移動 100px (配合新佈局) */
         }
 
         /* --------------------------------- */
@@ -139,7 +165,7 @@
             position: absolute; /* 相對 body 定位 */
             top: 50%; /* 【調整】紀錄區塊的垂直位置 */
             left: 50%; /* 水平中央位置 */
-            transform: translate(-50%, 140px); /* 水平置中並向下移動 140px */
+            transform: translate(-50%, 190px); /* 水平置中並向下移動 190px (配合新佈局) */
         }
         
         .history-list {
@@ -174,6 +200,13 @@
     <div id="pickerContainer">
         <!-- 核心功能區塊 -->
         <div id="resultBox" class="result-box">--</div>
+        
+        <!-- 新增: 抽獎數量設定區塊 -->
+        <div class="draw-count-group">
+            <label for="drawCountInput" class="draw-count-label">一次抽出人數：</label>
+            <input type="number" id="drawCountInput" value="1" min="1" max="30" class="draw-count-input">
+        </div>
+        
         <div class="button-group">
             <button id="pickBtn" class="button" disabled>開始抽獎</button>
             <button id="clearHistoryBtn" class="button">清除紀錄</button>
@@ -275,6 +308,7 @@
         const historyList = document.getElementById('historyList'); // 取得歷史紀錄清單 (UL)
         const historyCountSpan = document.getElementById('historyCount'); // 取得歷史紀錄計數顯示區
         const clearHistoryBtn = document.getElementById('clearHistoryBtn'); // 取得「清除紀錄」按鈕
+        const drawCountInput = document.getElementById('drawCountInput'); // 取得抽獎數量輸入框 (新增)
         
         // 狀態變數
         let currentGid = ''; // 當前選中的名單 GID (工作表分頁 ID)
@@ -337,12 +371,16 @@
             if (teamsData.length > 0) { // 檢查名單是否有內容
                 resultBox.textContent = '準備好了！'; // 顯示準備訊息
                 pickBtn.disabled = false; // 啟用抽獎按鈕
+                // 啟用數量輸入框
+                if (drawCountInput) drawCountInput.disabled = false;
                 if (messageDiv) {
                     messageDiv.textContent = ''; // 清空提示訊息
                 }
             } else {
                 resultBox.textContent = '載入失敗'; // 顯示載入失敗訊息
                 pickBtn.disabled = true; // 禁用抽獎按鈕
+                // 禁用數量輸入框
+                if (drawCountInput) drawCountInput.disabled = true;
                 if (messageDiv) {
                     messageDiv.textContent = '試算表中沒有找到可用的姓名資料。'; // 顯示錯誤提示
                 }
@@ -369,15 +407,27 @@
          * 開始抽獎的主要邏輯：執行亂數跳動動畫並選定結果。
          */
         function startPicking() {
-            if (isPicking || teamsData.length === 0) { // 檢查是否正在抽獎或名單是否為空
+            // 1. 獲取要抽取的數量並驗證
+            const drawCount = parseInt(drawCountInput.value); // 讀取輸入框值
+            
+            if (isNaN(drawCount) || drawCount < 1) { // 檢查是否為有效數字且大於 0
+                if (messageDiv) messageDiv.textContent = '請輸入有效的抽獎人數 (至少 1 人)。';
+                return;
+            }
+            
+            // 確保要抽取的數量不超過名單剩餘人數
+            const actualDrawCount = Math.min(drawCount, teamsData.length);
+            
+            if (isPicking || actualDrawCount === 0) { // 檢查是否正在抽獎或剩餘人數為 0
                 if (teamsData.length === 0 && messageDiv) {
-                    messageDiv.textContent = '名單已抽完，請點擊「清除紀錄」重新開始。'; // 顯示抽完提示
+                    messageDiv.textContent = '名單已抽完，請點擊「清除紀錄」重新開始。';
                 }
                 return; // 退出函數
             }
 
             isPicking = true; // 設定抽獎狀態為進行中
             pickBtn.disabled = true; // 禁用抽獎按鈕，防止重複點擊
+            drawCountInput.disabled = true; // 禁用數量輸入框
             if (messageDiv) {
                 messageDiv.textContent = ''; // 清空提示訊息
             }
@@ -404,21 +454,50 @@
                     // 步驟 2: 停止轉動音效
                     stopSpinSound(); // 停止持續的轉動音效
 
-                    // 確定最終結果從尚未抽出的名單 (teamsData) 中選取
-                    const finalIndex = Math.floor(Math.random() * teamsData.length); // 亂數選擇最終結果的索引
-                    const finalItem = teamsData[finalIndex]; // 根據索引取得最終結果
+                    // 2. 確定最終結果 (選取 actualDrawCount 個不重複的結果)
+                    const finalResults = []; // 儲存最終結果的項目
+                    const resultsIndices = []; // 儲存被選中項目在 teamsData 中的索引
                     
-                    resultBox.textContent = finalItem; // 在結果框顯示最終結果
+                    // 循環抽取 actualDrawCount 個不重複的結果
+                    for (let i = 0; i < actualDrawCount; i++) {
+                        let randomIndex;
+                        // 確保選中的索引是唯一且有效的
+                        do {
+                            randomIndex = Math.floor(Math.random() * teamsData.length);
+                        } while (resultsIndices.includes(randomIndex));
+
+                        // 儲存結果
+                        if (teamsData[randomIndex]) {
+                            finalResults.push(teamsData[randomIndex]);
+                            resultsIndices.push(randomIndex);
+                        }
+                    }
+                    
+                    // 將索引按降冪排列，這樣從大到小移除元素時，不會影響後續索引的準確性
+                    resultsIndices.sort((a, b) => b - a);
+
+                    const finalItemText = finalResults.join('、'); // 將多個結果用頓號分隔
+                    resultBox.textContent = finalItemText; // 在結果框顯示最終結果
                     
                     // 步驟 3: 播放結束音效 (只播特定片段)
-                    playFinishSound(9, 2); // 【調整】音效參數：從第 9 秒開始播，持續 2 秒
+                    playFinishSound(9, 2); 
                     
                     if (messageDiv) {
-                        messageDiv.textContent = '🎉 抽出: ' + finalItem + ' 🎉'; // 顯示最終結果的提示文字
+                        messageDiv.textContent = `🎉 恭喜抽出 ${actualDrawCount} 人: ${finalItemText} 🎉`; // 顯示最終結果的提示文字
                     }
-                    drawHistory.push(finalItem); // 將結果加入歷史紀錄
-                    teamsData.splice(finalIndex, 1); // 將已抽出的從待抽名單中移除
+                    
+                    // 3. 更新 drawHistory 和 teamsData
+                    finalResults.forEach(item => drawHistory.push(item)); // 將結果加入歷史紀錄
+                    
+                    // 從 teamsData 中移除已抽取的項目 (從後往前移除)
+                    resultsIndices.forEach(index => {
+                        teamsData.splice(index, 1);
+                    });
+                    
                     renderHistory(); // 更新歷史紀錄顯示
+                    
+                    // 4. 重置狀態
+                    drawCountInput.disabled = false; // 啟用數量輸入框
                     
                     if (teamsData.length > 0) { // 檢查是否還有待抽名單
                         pickBtn.disabled = false; // 如果還有名單，則啟用按鈕
@@ -441,6 +520,10 @@
 
             drawHistory = []; // 清空紀錄陣列
             renderHistory(); // 更新歷史紀錄顯示 (清空列表)
+            
+            // 啟用數量輸入框
+            if (drawCountInput) drawCountInput.disabled = false;
+
             updateList(); // 重載名單 (將 teamsData 恢復到完整名單)
             if (messageDiv) {
                 messageDiv.textContent = '紀錄已清除，名單已重置。'; // 顯示清除紀錄後的提示文字
